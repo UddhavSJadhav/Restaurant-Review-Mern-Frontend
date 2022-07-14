@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import RestaurantDataService from "../services/restaurant";
+import RestaurantDataService from "../api/restaurant";
 import { Link } from "react-router-dom";
 
 const RestaurantsList = (props) => {
@@ -32,7 +32,6 @@ const RestaurantsList = (props) => {
   const retrieveRestaurants = () => {
     RestaurantDataService.getAll()
       .then((response) => {
-        console.log(response.data);
         setRestaurants(response.data.restaurants);
       })
       .catch((e) => {
@@ -43,7 +42,6 @@ const RestaurantsList = (props) => {
   const retrieveCuisines = () => {
     RestaurantDataService.getCuisines()
       .then((response) => {
-        console.log(response.data);
         setCuisines(["All Cuisines"].concat(response.data));
       })
       .catch((e) => {
@@ -58,7 +56,6 @@ const RestaurantsList = (props) => {
   const find = (query, by) => {
     RestaurantDataService.find(query, by)
       .then((response) => {
-        console.log(response.data);
         setRestaurants(response.data.restaurants);
       })
       .catch((e) => {
@@ -86,51 +83,58 @@ const RestaurantsList = (props) => {
     <div>
       <div className='row pb-1'>
         <div className='col-lg-4'>
-          <input
-            type='text'
-            className='form-control'
-            placeholder='Search by name'
-            value={searchName}
-            onChange={onChangeSearchName}
-          />
-          <div className='input-group-append'>
+          <div className='input-group mb-3'>
+            <input
+              type='text'
+              className='form-control'
+              placeholder='Search by name'
+              aria-describedby='button-addon2'
+              value={searchName}
+              onChange={onChangeSearchName}
+            />
             <button
               className='btn btn-outline-secondary'
               type='button'
+              id='button-addon2'
               onClick={findByName}>
               Search
             </button>
           </div>
         </div>
         <div className='col-lg-4'>
-          <input
-            type='text'
-            className='form-control'
-            placeholder='Search by zip'
-            value={searchZip}
-            onChange={onChangeSearchZip}
-          />
-          <div className='input-group-append'>
+          <div className='input-group mb-3'>
+            <input
+              type='text'
+              className='form-control'
+              placeholder='Search by zip'
+              aria-describedby='button-addon2'
+              value={searchZip}
+              onChange={onChangeSearchZip}
+            />
             <button
               className='btn btn-outline-secondary'
               type='button'
+              id='button-addon2'
               onClick={findByZip}>
               Search
             </button>
           </div>
         </div>
         <div className='col-lg-4'>
-          <select onChange={onChangeSearchCuisine} className='form-control'>
-            {cuisines.map((cuisine) => {
-              return (
-                <option value={cuisine} key={cuisine}>
-                  {" "}
-                  {cuisine.substr(0, 20)}{" "}
-                </option>
-              );
-            })}
-          </select>
-          <div className='input-group-append'>
+          <div className='input-group'>
+            <select
+              onChange={onChangeSearchCuisine}
+              className='form-select'
+              id='inputGroupSelect04'>
+              {cuisines.map((cuisine) => {
+                return (
+                  <option value={cuisine} key={cuisine}>
+                    {" "}
+                    {cuisine.substr(0, 20)}{" "}
+                  </option>
+                );
+              })}
+            </select>
             <button
               className='btn btn-outline-secondary'
               type='button'
@@ -140,11 +144,11 @@ const RestaurantsList = (props) => {
           </div>
         </div>
       </div>
-      <div className='row'>
+      <div className='row g-3'>
         {restaurants.map((restaurant) => {
           const address = `${restaurant.address.building} ${restaurant.address.street}, ${restaurant.address.zipcode}`;
           return (
-            <div className='col-lg-4 pb-1' key={restaurant._id}>
+            <div className='col-md-4 mb-3' key={restaurant._id}>
               <div className='card'>
                 <div className='card-body'>
                   <h5 className='card-title'>{restaurant.name}</h5>

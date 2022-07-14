@@ -1,20 +1,15 @@
 import React, { useState } from "react";
-import RestaurantDataService from "../services/restaurant";
-import { Link, useParams } from "react-router-dom";
+import RestaurantDataService from "../api/restaurant";
+import { useSelector } from "react-redux";
 
 const AddReview = (props) => {
-  let initialReviewState = "";
-
-  let editing = false;
-
-  if (props.editReview && props.editReview.text) {
-    editing = true;
-    initialReviewState = props.editReview.text;
-  }
-
-  const { id } = useParams();
-  const [review, setReview] = useState(initialReviewState);
-  const [submitted, setSubmitted] = useState(false);
+  const { id } = useSelector((store) => store.user);
+  const { res_id } = props;
+  const { canAddReview, setRestaurant, setCanAddReview } = props.other;
+  const { name } = useSelector((store) => store.user);
+  const [added, setAdded] = useState(false);
+  const [reverror, setError] = useState("");
+  const [review, setReview] = useState("");
 
   const handleInputChange = (event) => {
     setReview(event.target.value);
@@ -23,75 +18,112 @@ const AddReview = (props) => {
   const saveReview = () => {
     var data = {
       text: review,
-      name: props.user.name,
-      user_id: props.user.id,
-      restaurant_id: id,
+      name: name,
+      restaurant_id: res_id,
     };
 
-    if (editing) {
-      data.review_id = props.editReview._id;
-      console.log(data);
-      RestaurantDataService.updateReview(data)
-        .then((response) => {
-          setSubmitted(true);
-          console.log(response.data);
-          props.setEditReview(null);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    } else {
-      RestaurantDataService.createReview(data)
-        .then((response) => {
-          setSubmitted(true);
-          props.setEditReview(null);
-          console.log(response.data);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+    if (review.trim() === "") {
+      setError("*Enter Review");
+      return;
     }
+
+    RestaurantDataService.createReview(data)
+      .then((response) => {
+        setRestaurant((prevState) => {
+          prevState.reviews.push(response.data);
+          return {
+            ...prevState,
+          };
+        });
+        setCanAddReview(false);
+        setError("");
+        setAdded(true);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   return (
     <div>
-      {props.user ? (
-        <div className='submit-form'>
-          {submitted ? (
-            <div>
-              <h4>You submitted successfully!</h4>
-              <Link
-                to={"/restaurants/" + id}
-                className='btn btn-success'
-                onClick={() => props.setEditReview(null)}>
-                Back to Restaurant
-              </Link>
-            </div>
-          ) : (
-            <div>
-              <div className='form-group'>
-                <label htmlFor='description'>
-                  {editing ? "Edit" : "Create"} Review
-                </label>
-                <input
-                  type='text'
-                  className='form-control'
-                  id='text'
-                  required
-                  value={review}
-                  onChange={handleInputChange}
-                  name='text'
-                />
-              </div>
-              <button onClick={saveReview} className='btn btn-success'>
-                Submit
-              </button>
-            </div>
-          )}
-        </div>
+      {id ? (
+        <button
+          type='button'
+          className='btn btn-primary'
+          data-bs-toggle='modal'
+          data-bs-target='#addModal'
+          disabled={!canAddReview}>
+          {canAddReview ? "Add Review" : "Review Added"}
+        </button>
       ) : (
-        <div>Please log in.</div>
+        <button disabled={true} className='btn btn-primary'>
+          Login to add Review
+        </button>
       )}
+
+      <div
+        className='modal fade'
+        id='addModal'
+        tabIndex='-1'
+        aria-labelledby='addModalLabel'
+        aria-hidden='true'>
+        <div className='modal-dialog'>
+          <div className='modal-content'>
+            <div className='modal-header'>
+              <h5 className='modal-title' id='addModalLabel'>
+                Add Review
+              </h5>
+              <button
+                type='button'
+                className='btn-close'
+                data-bs-dismiss='modal'
+                aria-label='Close'></button>
+            </div>
+            <div className='modal-body'>
+              <div className='submit-form'>
+                <div>
+                  <div className='form-group'>
+                    <input
+                      type='text'
+                      className='form-control'
+                      id='text'
+                      required
+                      value={review}
+                      onChange={handleInputChange}
+                      name='text'
+                    />
+                    <span className='text-danger fs-6'>{reverror}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className='modal-footer'>
+              <button
+                type='button'
+                className='btn btn-secondary'
+                data-bs-dismiss='modal'>
+                Close
+              </button>
+              {added ? (
+                <button
+                  type='button'
+                  data-bs-dismiss='modal'
+                  className='btn btn-success'
+                  onClick={() => setAdded(false)}>
+                  Review Added
+                </button>
+              ) : (
+                <button
+                  type='button'
+                  className='btn btn-success'
+                  onClick={saveReview}>
+                  Add Review
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
