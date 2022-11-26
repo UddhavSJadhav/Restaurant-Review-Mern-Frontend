@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API = axios.create({
   // baseURL: "http://localhost:5000/api/v1",
-  baseURL: "https://restaurantreviewapi.herokuapp.com/api/v1",
+  baseURL: "https://restaurant-review-mern-backend.vercel.app/api/v1",
   headers: {
     "Content-type": "application/json",
   },

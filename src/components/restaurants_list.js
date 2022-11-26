@@ -144,12 +144,21 @@ const RestaurantsList = (props) => {
           </div>
         </div>
       </div>
+      {restaurants === [] && (
+        <div class='d-flex align-items-center'>
+          <strong>Loading...</strong>
+          <div
+            class='spinner-border ms-auto'
+            role='status'
+            aria-hidden='true'></div>
+        </div>
+      )}
       <div className='row g-3'>
         {restaurants.map((restaurant) => {
           const address = `${restaurant.address.building} ${restaurant.address.street}, ${restaurant.address.zipcode}`;
           return (
             <div className='col-md-4 mb-3' key={restaurant._id}>
-              <div className='card'>
+              <div className='card h-100'>
                 <div className='card-body'>
                   <h5 className='card-title'>{restaurant.name}</h5>
                   <p className='card-text'>
@@ -159,7 +168,7 @@ const RestaurantsList = (props) => {
                     <strong>Address: </strong>
                     {address}
                   </p>
-                  <div className='row'>
+                  <div className='row mx-auto'>
                     <Link
                       to={"/restaurants/" + restaurant._id}
                       className='btn btn-primary col-lg-5 mx-1 mb-1'>
